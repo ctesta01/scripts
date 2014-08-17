@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# help text
+function usage {
+cat << EOF
+sprunge is a pastebin developed for people working in the command line.
+refer to http://sprunge.us for more information
+	sprunge -c FILE		... sprunge the contents of FILE
+	sprunge -o COMMAND	... sprunge the output of COMMAND
+	sprunge -e PHRASE	... sprunge the PHRASE
+	sprunge -v ID		... display a sprunge paste based on its ID
+  	sprunge -h		... print this help file
+EOF
+exit 1
+}
+
+# start a sprunge notepad
+if [ $# = 0 ]; then
+echo "Press Ctrl+D twice to submit the sprunge-paste."
+curl -s -F 'sprunge=<-' http://sprunge.us
+exit 0
+fi
+
+# cat a file and send the output to a sprunge paste
+if [ "$1" = "-c" ]; then
+cat $2 | curl -F 'sprunge=<-' http://sprunge.us
+exit 0
+fi
+
+# sprunge the output of a command
+if [ "$1" = "-o" ]; then
+${@:2} | curl -F 'sprunge=<-' http://sprunge.us
+exit 0
+fi
+
+# sprunge the phrase passed
+if [ "$1" = "-e" ]; then
+echo $2 | curl -F 'sprunge=<-' http://sprunge.us
+exit 0
+fi
+
+# sprunge the phrase passed
+if [ "$1" = "-v" ]; then
+curl http://sprunge.us/$2
+exit 0
+fi
+
+#otherwise display usage
+usage;
+

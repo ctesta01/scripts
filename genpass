@@ -1,0 +1,8 @@
+#!/bin/bash
+if [ $# -ne 1 ]; then
+cat /dev/urandom| tr -dc '0-9a-zA-Z!@#$%^&amp;*_+-'|head -c 15;echo;
+
+else
+cat /dev/urandom| tr -dc '0-9a-zA-Z!@#$%^&amp;*_+-'|head -c $1 ;echo;
+
+fi

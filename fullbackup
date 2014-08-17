@@ -1,0 +1,91 @@
+#!/bin/bash
+# Backup Script by Jesse Harris
+# Create backups of /etc, /home, /usr/local, and...
+PATH=/bin:/usr/bin
+
+################################################## #####################
+# Please edit these variables to match your system #
+# #
+# backupdirs - This specifies seperate archives you wish to create #
+# - You can put a .exclude file into these directories #
+# - for manual exclusions (Specify the full path) #
+# dir - This is where you backups will be stored, if it is #
+# - within your inclusion path, make sure to put it into #
+# - its relevant .exclude file. #
+# homes - This is a temp file created whenever the script is run #
+# sizecheck - This specifies that home directories are to be scanned #
+# - for file sizes, do not change this variable #
+# maxsize - This specifies that anything exceeding this size within#
+# - anyones home directory will be automatically excluded #
+#-----------------------------Good Luck-------------------------------#
+################################################## #####################
+
+backupdirs="/etc /root /home /boot /var /bin /initrd /lib /sbin /usr"
+dm=`date +%Y-%m-%d-%H-%M`
+dir="/root/backup/"
+homes="/tmp/homes"
+sizecheck="/home"
+maxsize="+10M"
+
+# Check if root
+if [ "$(whoami)" != "root" ]; then
+echo "Not running as root. Exiting..."
+exit 0
+else
+echo "Running as root. Good"
+fi
+
+mkdir -p $dir$dm
+
+for path in $backupdirs
+do
+if [ "$path" = "$sizecheck" ]; then
+ls $path > $homes
+for home in $(cat $homes)
+do
+if [ "$home" != "$sizecheck" ]; then
+echo "Checking $home Filesizes..."
+find $path/$home/ -size $maxsize -type f -print > $path/$home/auto-exclude
+echo "System backup on $path/$home"
+tar --exclude-from=$path/$home/auto-exclude --exclude-from=$path/$home/.exclude -czf $dir$dm/$home.tar.gz $path/$home 2>/dev/null
+fi
+done
+else
+if [ -e $path/.exclude ]; then
+echo "Reading exclude file.. for $path"
+echo "System backup on $path"
+tar --exclude-from=$path/.exclude -czf $dir$dm/$path.tar.gz $path 2>>/dev/null
+else
+echo "System backup on $path"
+tar czf $dir$dm/$path.tar.gz $path 2>>/dev/null
+fi
+fi
+sleep 2
+done
+
+echo "System backups complete, status: $?"
+echo "Now verifying system backups"
+
+for path in $backupdirs
+do
+echo "Verifying $path...."
+if [ "$path" = "/home" ]; then
+for home in $(cat $homes)
+do
+zcat $dir$dm/$home.tar.gz | tar t 2>/dev/null && \
+if [ $? -eq 0 ]
+then echo "$path: verified"
+else echo "$path: error(s) in verify" | wall
+fi
+done
+else
+zcat $dir$dm/$path.tar.gz | tar t 2>/dev/null && \
+if [ $? -eq 0 ]
+then echo "$path: verified"
+else echo "$path: error(s) in verify" | wall
+fi
+fi
+done
+
+
+echo "Please remove backup tape" | wall

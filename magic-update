@@ -1,0 +1,22 @@
+#! /bin/bash
+touch ~/.magic-update.tmp
+_file=~/.magic-update.tmp
+echo -e "\n\n    ---- Syncing /home/bin/ ---- \n\n" 
+rsync -aLv ctesta:/var/www/public/bin/ /home/bin 2> $_file
+
+# sets file permissions for scripts
+find /home/bin -type f -exec chmod 0644 {} \; 2>> $_file
+
+echo -e "\n\n    ---- Syncing bash_aliases ---- \n\n"
+rsync -aLv ctesta:/var/www/public/bash_aliases /etc/ 2>> $_file
+
+
+if [ -s "$_file" ]
+then
+echo "There were errors syncing :("
+cat $_file
+else
+echo -e "Sync from ctesta.com completed successfully!\nHave a great day!"
+fi
+
+rm $_file

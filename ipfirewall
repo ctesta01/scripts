@@ -1,0 +1,116 @@
+#!/bin/bash
+#
+# iptables Default Set Up Script
+#
+# Flush all current rules
+        iptables -F
+        iptables -X
+#        iptables -t nat -F
+#        iptables -t nat -X
+        iptables -t mangle -F
+        iptables -t mangle -X
+        iptables -P INPUT ACCEPT
+        iptables -P FORWARD ACCEPT
+        iptables -P OUTPUT ACCEPT
+#
+#
+# Allow localhost connections
+        iptables -A INPUT -i lo -j ACCEPT
+#
+# Allow Established and Related connections
+        iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+#
+# Allow all Local Area Network connections
+        iptables -A INPUT -s 192.168.1.0/24 -j ACCEPT
+#
+# Allow SSH connections
+#        iptables -A INPUT -s 173.227.74.5 -p tcp --dport 2056 -j ACCEPT
+#	iptables -A INPUT -s 172.245.142.173 -p tcp --dport 2056 -j ACCEPT
+        iptables -A INPUT -s 192.185.80.246 -p tcp --dport 2056 -j ACCEPT
+        iptables -A INPUT -s 99.17.192.133 -p tcp --dport 2056 -j ACCEPT
+        iptables -A INPUT -s 70.113.24.50 -p tcp --dport 2056 -j ACCEPT
+
+# Allow named connections
+	iptables -A INPUT -p udp --sport 53 -j ACCEPT
+	iptables -A INPUT -p udp --dport 53 -j ACCEPT
+	iptables -A OUTPUT -p udp --sport 53 -j ACCEPT
+	iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
+
+	iptables -A INPUT -p udp -j DROP
+	iptables -A OUTPUT -p udp -j DROP
+
+
+#
+# DO NOT Allow MySQL connections
+#        iptables -A INPUT -p tcp --dport 3306 -j ACCEPT
+#
+# Allow FTP connections
+#        iptables -A INPUT -p tcp --dport 21 -j ACCEPT 
+#
+# Allow IRC connections
+#        iptables -A INPUT -p tcp --dport xxxx -j ACCEPT
+#
+# Do NOT Allow  DCC connections in IRC
+#        iptables -A INPUT -p tcp --dport 1024 -j ACCEPT
+#
+# Allow HTTPD connections
+        iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+#
+# Allow DELUGED connections
+	iptables -A INPUT -p tcp --dport 8112 -j ACCEPT
+
+# Allow FFSERVER connections
+#        iptables -A INPUT -p tcp --dport xxxx -j ACCEPT
+#
+# Allow Ventrilo connections
+#        iptables -A INPUT -p tcp --dport xxxx -j ACCEPT
+#        iptables -A INPUT -p udp --dport xxxx -j ACCEPT
+#
+# Allow NFS connections
+#       iptables -A INPUT -s 192.168.1.0/24 -p tcp --dport 111 -j ACCEPT
+#       iptables -A INPUT -s 192.168.1.0/24 -p udp --dport 111 -j ACCEPT
+#       iptables -A INPUT -s 192.168.1.0/24 -p tcp --dport 2049 -j ACCEPT
+#       iptables -A INPUT -s 192.168.1.0/24 -p udp --dport 2049 -j ACCEPT
+#
+# Allow PLEXMEDIASERVER connections
+#       iptables -A INPUT -p tcp -s 151.228.151.1 --dport 32400 -j ACCEPT
+#       iptables -A INPUT -p udp -s 151.228.151.1 --dport 32400 -j ACCEPT
+#       iptables -A INPUT -p tcp -s 189.245.70.106 --dport 32400 -j ACCEPT
+#       iptables -A INPUT -p udp -s 189.245.70.106 --dport 32400 -j ACCEPT
+#
+# Allow Windows File Sharing connections
+#       iptables -A INPUT -s 192.168.1.0/24 -p tcp --dport 445 -j ACCEPT
+#       iptables -A INPUT -s 192.168.1.0/24 -p udp --dport 445 -j ACCEPT
+#
+# Allow Incoming Port 9000 connections
+#        iptables -A INPUT -p tcp --dport 9537 -j ACCEPT
+#
+# Redirect Incoming Port 9537 connections to 192.168.1.65:9537
+#        iptables -t nat -A PREROUTING -p tcp -i eth0 -d 99.112.165.71 --dport 9537 -j DNAT --to 192.168.1.65:9537
+#        iptables -A FORWARD -p tcp -i eth0 -d 192.168.1.65 --dport 9537 -j ACCEPT
+#        iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE 
+#
+# Allow Incoming Vesta Port 8083
+        iptables -A INPUT -p tcp --dport 8083 -j ACCEPT
+
+
+# Drop all other INPUT
+        iptables -P INPUT DROP
+#
+# Drop all FORWARDED packets
+        iptables -P FORWARD DROP
+#
+# Allow all OUTPUT
+        iptables -P OUTPUT ACCEPT
+#
+# Save Settings
+        /sbin/service iptables save
+#
+# Display default rules
+        iptables -L -v
+#
+
+
+# Echo Done
+        echo -e "\nDONE!"
+

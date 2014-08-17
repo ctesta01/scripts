@@ -1,0 +1,10 @@
+#!/bin/bash
+pass=$1
+
+if [ $# -ne 1 ]
+then
+    echo "Please provide the password you need the SHA1 hash of: "
+    read -s pass
+fi
+
+echo -n "$pass" | openssl sha1 | cut -d \  -f 2 | tr -d ' '
