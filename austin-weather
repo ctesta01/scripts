@@ -1,0 +1,70 @@
+#!/bin/bash
+tmpPath=/tmp/weather-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+curl -s http://api.wunderground.com/weatherstation/WXCurrentObXML.asp?ID=KTXAUSTI343 > $tmpPath
+sed -i -e 's/^[ \t]*//' $tmpPath
+sed -i '/^\s*$/d' $tmpPath
+
+### Remove Excessive Information
+sed -i '/<?xml/d' $tmpPath
+sed -i '/<current_/d' $tmpPath
+sed -i '/<credit/d' $tmpPath
+sed -i '/<image/d' $tmpPath
+sed -i '/<title/d' $tmpPath
+sed -i '/<link/d' $tmpPath
+sed -i '/<url/d' $tmpPath
+sed -i '/<\/image/d' $tmpPath
+sed -i '/<neighborhood/d' $tmpPath
+sed -i '/<city/d' $tmpPath
+sed -i '/<state/d' $tmpPath
+sed -i '/<zip/d' $tmpPath
+sed -i '/<\/location/d' $tmpPath
+sed -i '/<location/d' $tmpPath
+sed -i '/<station_id/d' $tmpPath
+sed -i '/<station_type/d' $tmpPath
+sed -i '/<observation_time_rfc822/d' $tmpPath
+sed -i '/<weather/d' $tmpPath
+sed -i '/<temp_f/d' $tmpPath
+sed -i '/<temp_c/d' $tmpPath
+sed -i '/<relative_humidity/d' $tmpPath
+sed -i '/<wind_dir/d' $tmpPath
+sed -i '/<wind_degrees/d' $tmpPath
+sed -i '/<wind_mph/d' $tmpPath
+sed -i '/<wind_gust_mph/d' $tmpPath
+sed -i '/<pressure_mb/d' $tmpPath
+sed -i '/<pressure_in/d' $tmpPath
+sed -i '/<pressure_in/d' $tmpPath
+sed -i '/<dewpoint_f/d' $tmpPath
+sed -i '/<dewpoint_c/d' $tmpPath
+sed -i '/<heat_index_f/d' $tmpPath
+sed -i '/<heat_index_c/d' $tmpPath
+sed -i '/<windchill/d' $tmpPath
+sed -i '/<solar/d' $tmpPath
+sed -i '/<UV/d' $tmpPath
+sed -i '/<precip_1hr_in/d' $tmpPath
+sed -i '/<precip_1hr_metric/d' $tmpPath
+sed -i '/<precip_today_in/d' $tmpPath
+sed -i '/<precip_today_metric/d' $tmpPath
+sed -i '/<\/current_observation/d' $tmpPath
+sed -i '/<history_url/d' $tmpPath
+sed -i '/<ob_url/d' $tmpPath
+
+
+# Replace XML tags with formatted tags
+sed -i -e 's|<full>|Location:\t|g' $tmpPath
+sed -i -e 's|<latitude>|Latitude:\t|g' $tmpPath
+sed -i -e 's|<elevation>|Elevation:\t|g' $tmpPath
+sed -i -e 's|<observation_time>|Observation Time:\t|g' $tmpPath
+sed -i -e 's|<temperature_string>|Temperature:\t|g' $tmpPath
+sed -i -e 's|<wind_string>|Wind:\t|g' $tmpPath
+sed -i -e 's|<pressure_string>|Pressure:\t|g' $tmpPath
+sed -i -e 's|<dewpoint_string>|Dewpoint:\t|g' $tmpPath
+sed -i -e 's|<heat_index_string>|Heat Index:\t|g' $tmpPath
+sed -i -e 's|<precip_1hr_string>|Hourly Precipitation:\t|g' $tmpPath
+sed -i -e 's|<precip_today_string>|Daily Precipitation:\t|g' $tmpPath
+sed -i -e 's|<history_url>|History:\t|g' $tmpPath
+sed -i -e 's|<ob_url>|Observation:\n|g' $tmpPath
+
+
+### Render the final result
+sed -i -e 's|<[^>]*>||g' $tmpPath
+cat $tmpPath | column -ts $'\t'

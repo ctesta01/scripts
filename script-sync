@@ -1,0 +1,9 @@
+#!/bin/bash
+for i in $(curl http://ctesta.com/scripts/ls.php); do
+  if [ -e "/usr/local/bin/$i" ]; then
+    echo "$i exists, deleting and updating"
+    rm -f /usr/local/bin/$i
+  fi
+wget http://ctesta.com/scripts/$i
+chmod +x /usr/local/bin/$i
+done
